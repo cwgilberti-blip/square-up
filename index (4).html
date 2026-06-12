@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Square Up! — Gilberti Pocket Square Playbook</title>
+  <meta name="description" content="The ultimate interactive guide to folding your Gilberti silk pocket square. Seven folds, beautifully illustrated, with a stylist's note for every occasion." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400;1,500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #07122e; color: #F7F3EC; font-family: 'Cormorant Garamond', Georgia, serif; -webkit-font-smoothing: antialiased; }
+    #root { min-height: 100vh; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:translateY(0) } }
+    @keyframes tipIn  { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
+    @keyframes imgIn  { from { opacity:0; transform:scale(0.97) } to { opacity:1; transform:scale(1) } }
+    .fold-card { cursor:pointer; transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease; }
+    .fold-card:hover { transform:translateY(-6px) !important; border-color:#C4963A !important; box-shadow:0 16px 48px rgba(196,150,58,0.18) !important; }
+    .back-btn { cursor:pointer; transition: color 0.18s, letter-spacing 0.18s; user-select:none; }
+    .back-btn:hover { color:#C4963A !important; letter-spacing:0.14em !important; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+    const { useState } = React;
+
+    const GOLD  = "#C4963A";
+    const CREAM = "#F7F3EC";
+
+    const FOLDS = [
+      {
+        id: "presidential",
+        name: "Presidential",
+        difficulty: "Beginner",
+        tagline: "The Boardroom Standard",
+        image: "https://gilberti-assets.s3.us-east-2.amazonaws.com/presidential.jpg",
+        tip: "The Presidential speaks to quiet authority — the fold of a man who lets his presence do the work rather than his pocket. Reach for it with a chalk-stripe suit or a navy blazer at any occasion where precision earns respect: a board meeting, a formal dinner, a black-tie wedding."
+      },
+      {
+        id: "one-point",
+        name: "One Point",
+        difficulty: "Beginner",
+        tagline: "Sharp & Understated",
+        image: "https://gilberti-assets.s3.us-east-2.amazonaws.com/one-point.jpg",
+        tip: "The One Point is the gentleman's punctuation mark — precise, deliberate, final. It belongs on a charcoal or midnight blazer at a business dinner or evening event where you want to appear considered without appearing to have tried too hard."
+      },
+      {
+        id: "two-point",
+        name: "Two Point",
+        difficulty: "Beginner",
+        tagline: "Confident & Classic",
+        image: "https://gilberti-assets.s3.us-east-2.amazonaws.com/two-point.jpg",
+        tip: "The Two Point carries a quiet confidence — slightly more expressive than the Presidential, still firmly within the rules. It reads beautifully on a mid-blue suit at a gallery opening or smart dinner where you want to signal taste without spectacle."
+      },
+      {
+        id: "three-point",
+        name: "Three Point",
+        difficulty: "Intermediate",
+        tagline: "Expressive & Formal",
+        image: "https://gilberti-assets.s3.us-east-2.amazonaws.com/three-point.jpg",
+        tip: "The Three Point is for the man who understands that true sprezzatura demands effort disguised as ease — it looks spontaneous, but it requires precision. It thrives on a linen or seersucker suit at a coastal wedding or summer garden party that rewards a little showmanship."
+      },
+      {
+        id: "four-leaves",
+        name: "Four Leaves",
+        difficulty: "Intermediate",
+        tagline: "Dramatic & Artful",
+        image: "https://gilberti-assets.s3.us-east-2.amazonaws.com/four-leaves.jpg",
+        tip: "The Four Leaves is a statement fold — the choice when you want the pocket square to be the conversation, not merely part of it. It belongs at occasions that invite a flourish: a destination wedding, a gala, or any black-tie event that allows individual expression."
+      },
+      {
+        id: "winged-puff",
+        name: "Winged Puff",
+        difficulty: "Intermediate",
+        tagline: "Relaxed Sophistication",
+        image: "https://gilberti-assets.s3.us-east-2.amazonaws.com/winged-puff.jpg",
+        tip: "The Winged Puff has a nonchalance that is far harder to achieve than it looks — it suggests someone comfortable enough with elegance to wear it loosely. Reach for it with a blazer and trousers at a jazz brunch, an art opening, or any occasion that calls for style without severity."
+      },
+      {
+        id: "wave",
+        name: "Wave",
+        difficulty: "Advanced",
+        tagline: "Sculptural & Striking",
+        image: "https://gilberti-assets.s3.us-east-2.amazonaws.com/wave.jpg",
+        tip: "The Wave is reserved for the bold — a sculptural fold that announces an aesthetic point of view before you have said a word. It belongs at events where individual style is celebrated: a fashion gathering, a creative industry dinner, or anywhere your confidence arrives in the room before you do."
+      },
+    ];
+
+    const DIFF = {
+      Beginner:     { bg:"rgba(107,203,139,0.12)", color:"#6BCB8B", border:"rgba(107,203,139,0.3)" },
+      Intermediate: { bg:"rgba(240,192,64,0.12)",  color:"#F0C040", border:"rgba(240,192,64,0.3)" },
+      Advanced:     { bg:"rgba(224,123,114,0.12)", color:"#E07B72", border:"rgba(224,123,114,0.3)" },
+    };
+
+    const Crown = ({ size=36 }) => (
+      <img
+        src="https://gilberti-assets.s3.us-east-2.amazonaws.com/gilbert-logo-wt.png"
+        alt="Gilberti crown"
+        style={{ width: size*2, height: "auto", display: "block", margin: "0 auto" }}
+      />
+    );
+
+    const Badge = ({ d }) => {
+      const c = DIFF[d] || DIFF.Beginner;
+      return (
+        <span style={{
+          background: c.bg, color: c.color, border: `1px solid ${c.border}`,
+          borderRadius: 20, padding: "2px 10px", fontSize: 11,
+          fontFamily: "'Cormorant Garamond',serif", letterSpacing: "0.1em",
+          textTransform: "uppercase", fontWeight: 500
+        }}>{d}</span>
+      );
+    };
+
+    const Divider = () => (
+      <div style={{
+        width: 80, height: 1,
+        background: `linear-gradient(to right,transparent,${GOLD},transparent)`,
+        margin: "38px auto"
+      }}/>
+    );
+
+    function App() {
+      const [fold, setFold] = useState(null);
+      const [imgKey, setImgKey] = useState(0);
+
+      const select = (f) => { setFold(f); setImgKey(k => k+1); };
+
+      return (
+        <div style={{ minHeight:"100vh", background:"#07122e", fontFamily:"'Cormorant Garamond',Georgia,serif", color:CREAM }}>
+
+          {/* Header */}
+          <header style={{
+            textAlign:"center", padding:"40px 20px 30px",
+            borderBottom:"1px solid rgba(196,150,58,0.2)",
+            background:"linear-gradient(to bottom,#040d20,#07122e)"
+          }}>
+            <Crown size={46}/>
+            <div style={{ fontSize:10, letterSpacing:"0.28em", textTransform:"uppercase", color:GOLD, marginTop:10, fontWeight:500 }}>
+              The Ultimate Guide to
+            </div>
+            <div style={{ fontFamily:"'Dancing Script',cursive", fontSize:"clamp(40px,10vw,58px)", lineHeight:1.1, marginTop:4 }}>
+              Square Up!
+            </div>
+            <div style={{ fontSize:11, letterSpacing:"0.28em", textTransform:"uppercase", color:"rgba(197,227,238,0.45)", marginTop:6 }}>
+              Gilberti · Pocket Square Playbook
+            </div>
+          </header>
+
+          <div style={{ maxWidth:880, margin:"0 auto", padding:"0 20px" }}>
+
+            {!fold ? (
+              /* ── FOLD GRID ── */
+              <div style={{ animation:"fadeUp 0.45s ease forwards" }}>
+                <p style={{ textAlign:"center", marginTop:34, marginBottom:30, fontSize:19, color:"#C8E8F3", fontStyle:"italic" }}>
+                  Select a fold to begin
+                </p>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:14 }}>
+                  {FOLDS.map(f => (
+                    <div key={f.id} className="fold-card" onClick={() => select(f)}
+                      style={{
+                        background:"rgba(255,255,255,0.035)",
+                        border:"1px solid rgba(197,227,238,0.14)",
+                        borderRadius:14, padding:"22px 22px 18px",
+                        boxShadow:"0 4px 24px rgba(0,0,0,0.3)"
+                      }}>
+                      <div style={{ fontFamily:"'Dancing Script',cursive", fontSize:32, lineHeight:1.15, marginBottom:4 }}>
+                        {f.name}
+                      </div>
+                      <div style={{ fontSize:14, color:"rgba(197,227,238,0.6)", fontStyle:"italic", marginBottom:12 }}>
+                        {f.tagline}
+                      </div>
+                      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                        <Badge d={f.difficulty}/>
+                        <span style={{ fontSize:12, color:"rgba(196,150,58,0.65)" }}>View →</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ textAlign:"center", marginTop:52, paddingBottom:40 }}>
+                  <Divider/>
+                  <a href="https://gilbertisilkarts.com" style={{
+                    fontSize:12, letterSpacing:"0.2em", textTransform:"uppercase",
+                    color:"rgba(197,227,238,0.25)", textDecoration:"none"
+                  }}>gilbertisilkarts.com</a>
+                </div>
+              </div>
+
+            ) : (
+              /* ── FOLD DETAIL ── */
+              <div style={{ animation:"fadeUp 0.4s ease forwards" }}>
+
+                {/* Back button */}
+                <div className="back-btn" onClick={() => setFold(null)}
+                  style={{
+                    display:"inline-flex", alignItems:"center", gap:5,
+                    marginTop:26, fontSize:12, letterSpacing:"0.1em",
+                    textTransform:"uppercase", color:"rgba(197,227,238,0.4)"
+                  }}>
+                  ← All Folds
+                </div>
+
+                {/* Fold title */}
+                <div style={{ textAlign:"center", marginTop:10, marginBottom:28 }}>
+                  <div style={{ marginBottom:10 }}><Badge d={fold.difficulty}/></div>
+                  <div style={{ fontFamily:"'Dancing Script',cursive", fontSize:"clamp(40px,12vw,54px)", lineHeight:1.1 }}>
+                    {fold.name}
+                  </div>
+                  <div style={{ fontSize:16, color:"rgba(197,227,238,0.55)", fontStyle:"italic", marginTop:4 }}>
+                    {fold.tagline}
+                  </div>
+                </div>
+
+                {/* Illustration */}
+                <div key={imgKey} style={{
+                  animation:"imgIn 0.45s ease forwards",
+                  background:"rgba(255,255,255,0.97)",
+                  borderRadius:16,
+                  border:"1px solid rgba(196,150,58,0.22)",
+                  boxShadow:"0 12px 48px rgba(0,0,0,0.4)",
+                  overflow:"hidden",
+                  maxWidth:600,
+                  margin:"0 auto"
+                }}>
+                  <img
+                    src={fold.image}
+                    alt={`How to fold the ${fold.name}`}
+                    style={{ width:"100%", display:"block" }}
+                  />
+                </div>
+
+                {/* Stylist's Note */}
+                <Divider/>
+                <div style={{
+                  maxWidth:560, margin:"0 auto 20px",
+                  background:"rgba(196,150,58,0.05)",
+                  border:"1px solid rgba(196,150,58,0.18)",
+                  borderRadius:14, padding:"22px 28px"
+                }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
+                    <Crown size={22}/>
+                    <span style={{ fontSize:10, letterSpacing:"0.24em", textTransform:"uppercase", color:GOLD, fontWeight:500 }}>
+                      Stylist's Note
+                    </span>
+                  </div>
+                  <p style={{
+                    fontSize:17, lineHeight:1.72,
+                    color:"rgba(247,243,236,0.82)",
+                    fontStyle:"italic", fontWeight:300,
+                    animation:"tipIn 0.55s ease forwards"
+                  }}>{fold.tip}</p>
+                </div>
+
+                <div style={{ textAlign:"center", marginTop:28, paddingBottom:50 }}>
+                  <a href="https://gilbertisilkarts.com" style={{
+                    fontSize:11, letterSpacing:"0.2em", textTransform:"uppercase",
+                    color:"rgba(197,227,238,0.18)", textDecoration:"none"
+                  }}>gilbertisilkarts.com</a>
+                </div>
+
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>
